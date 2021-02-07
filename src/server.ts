@@ -1,4 +1,4 @@
-import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
+import { Application, Router, send } from "https://deno.land/x/oak@v6.5.0/mod.ts";
 
 
 /* const [diagnostics, js] = await Deno.bundle("./src/client.ts", undefined, {
