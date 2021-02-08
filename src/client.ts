@@ -11,7 +11,7 @@ import {
 
 import { until } from "https://cdn.skypack.dev/lit-html@1.3.0/directives/until.js";
 import { unsafeHTML } from "https://cdn.skypack.dev/lit-html@1.3.0//directives/unsafe-html.js";
-import Color from 'https://cdn.skypack.dev/ac-colors@1.4.2';
+import Color from "https://cdn.skypack.dev/ac-colors@1.4.2";
 
 const x = 1 * 2;
 console.log("Hello World from client.ts; " + x);
@@ -47,7 +47,7 @@ interface Actor extends Person {
 
 const replaceLastTwoSpaces = function (text: string) {
   const lastSpace = /\S+ \S+ \S+\s*$/g;
-  const lastWords = text.match(lastSpace)
+  const lastWords = text.match(lastSpace);
   text = text.replace(lastSpace, "");
   console.log(text);
   return html`${text}<nobr>${lastWords}</nobr>`;
@@ -61,13 +61,20 @@ class NitrileBook extends LitElement {
     const data = await fetch(src);
     const jason = await data.json();
     const movies: Movie[] = Object.values(jason.movies);
-    console.log(movies);
-    return movies;
+    const sortedMovies = movies.sort(
+      (m1: Movie, m2: Movie) => m1.year - m2.year
+    );
+
+    console.log(sortedMovies);
+    return sortedMovies;
   }
 
   renderMovies(movies: Movie[]) {
     return movies.map(
-      (movie) => html`<nitrile-movie .movie=${movie}></nitrile-movie>`
+      (movie, index) => html` <nitrile-movie
+        .movie=${movie}
+        class=${index % 2 == 0 ? "" : "reverse"}
+      ></nitrile-movie>`
     );
   }
 
@@ -124,10 +131,12 @@ class NitrileMovie extends LitElement {
         /* height: 20.93cm; */
         height: 20.955cm;
         display: flex;
-        flex-direction: row;
         overflow: hidden;
+        flex-direction: row;
       }
-
+      :host-context(.reverse) {
+        flex-direction: row-reverse;
+      }
       nitrile-peek {
         flex: 1;
       }
@@ -171,6 +180,7 @@ class NitrileRating extends LitElement {
 
         span {
           padding: 2px 4.5px;
+          line-height: 100%;
         }
 
         span:nth-of-type(odd) {
@@ -249,18 +259,18 @@ class NitrilePerson extends LitElement {
   }
 }
 
-const createColor = function(color: typeof Color) {
-  const reference = new Color({"color":"#D1F0CF", "type":"hex"}).lchab
-  const target = color.lchab
-  
-  const result = new Color({
-    "color": [reference[0], reference[1], target[2]], 
-    "type": "lchab"
-  })
+const createColor = function (color: typeof Color) {
+  const reference = new Color({ color: "#D1F0CF", type: "hex" }).lchab;
+  const target = color.lchab;
 
-  console.log(result)
-  return result
-}
+  const result = new Color({
+    color: [reference[0], reference[1], target[2]],
+    type: "lchab",
+  });
+
+  console.log(result);
+  return result;
+};
 
 @customElement("nitrile-peek")
 class NitrilePeek extends LitElement {
@@ -281,13 +291,17 @@ class NitrilePeek extends LitElement {
           margin: 9px 0;
         }
         img {
-          width: calc(100% + 2*18px - 2px);
+          width: calc(100% + 2 * 18px - 2px);
           margin: 0px -18px;
           border: #eee solid 1px;
         }
+
         h2 {
           margin: 0;
           margin-top: -9px;
+        }
+        :host-context(.reverse) > h2 {
+          text-align: right;
         }
         .genres {
           text-align: center;
@@ -306,9 +320,15 @@ class NitrilePeek extends LitElement {
 
   renderMovie(movie: Movie) {
     return html`
-      <style>:host { background-color: ${this.color.rgbString}}</style>
+      <style>
+        :host {
+          background-color: ${this.color.rgbString};
+        }
+      </style>
       <h2>${movie.year}</h2>
-      <p class="genres"><span>${replaceLastTwoSpaces(movie.tags.join(" | "))}</span></p>
+      <p class="genres">
+        <span>${replaceLastTwoSpaces(movie.tags.join(" | "))}</span>
+      </p>
       <nitrile-rating .movie=${movie}></nitrile-rating>
       ${movie.directors.map(
         (director) =>
@@ -331,56 +351,90 @@ class NitrilePeek extends LitElement {
 class NitrileMain extends LitElement {
   @property() movie: Movie | null = null;
 
-
-
   static get styles() {
     return [
       typographyStyle,
       css`
-      :host {
-        display: flex;
-        flex-direction: column;
-        margin: 36px;
-      }
-      h1 {
-        flex: 0;
-        height: 350px;
-        margin: 0:
-      }
-      h1.long {
-        font-size: 36pt;
-      }
-      h1.verylong {
-        font-size: 27pt;
-      }
-      h1.superlong {
-        font-size: 22pt;
-      }
-      
+        :host {
+          display: flex;
+          flex-direction: column;
+          margin: 36px;
+        }
+        .title-container {
+          display: flex;
+          margin: 0 -13px;
+          flex: 0;
+          width: calc(100% + 18px);
+          min-height: 140px;
+          justify-content: center;
+          align-items: center;
+        }
+        h1 {
+          flex: 0;
+          margin: 0;
+          text-align: center;
+          min-width: 100%;
+        }
+        h1.long {
+          font-size: 36pt;
+        }
+        h1.verylong {
+          font-size: 27pt;
+        }
+        h1.superlong {
+          font-size: 22pt;
+        }
 
-      p {
-        flex: 1;
-      }
-      .personal-rating {
-        flex: 0;
-        flex-basis: 140px;
-        border: #F0F0F0;
-        border-width: 15px;
-        border-style: solid;
-      }
+        p {
+          flex: 1;
+        }
+        p.long {
+          font-size: 12pt;
+        }
+        p.verylong {
+          font-size: 10pt;
+        }
+        p.superlong {
+          font-size: 9pt;
+        }
+
+        .personal-rating {
+          flex: 0;
+          flex-basis: 140px;
+          border: #f0f0f0;
+          border-width: 15px;
+          border-style: solid;
+        }
       `,
     ];
   }
 
   renderMovie(movie: Movie) {
-    const cls = 
-    movie.title.length >= 40 ? "superlong" :
-    movie.title.length >= 24 ? "verylong" :
-    movie.title.length >= 17 ? "long" : "";
+    const titleClass =
+      movie.title.length >= 40
+        ? "superlong"
+        : movie.title.length >= 24
+        ? "verylong"
+        : movie.title.length >= 17
+        ? "long"
+        : "";
+
+    const factor = 30
+
+    const synopsisClass =
+      movie.synopsis.length >= factor*40
+        ? "superlong"
+        : movie.synopsis.length >= factor*24
+        ? "verylong"
+        : movie.synopsis.length >= factor*17
+        ? "long"
+        : "";
 
     return html`
-      <h1 class=${cls}>${movie.title}</h1>
-      <p>${replaceLastTwoSpaces(movie.synopsis)}</p>
+      <div class="title-container">
+        <h1 class=${titleClass}>${movie.title}</h1>
+      </div>
+      <p class=${synopsisClass}>${replaceLastTwoSpaces(movie.synopsis)}</p>
       <div class="personal-rating">TODO: Rating here</div>
     `;
   }
