@@ -4,11 +4,14 @@ import {
   LitElement,
   html,
   css,
+  unsafeCSS,
   customElement,
   property,
 } from "https://cdn.skypack.dev/lit-element@2.4.0";
 
 import { until } from "https://cdn.skypack.dev/lit-html@1.3.0/directives/until.js";
+import { unsafeHTML } from "https://cdn.skypack.dev/lit-html@1.3.0//directives/unsafe-html.js";
+import Color from 'https://cdn.skypack.dev/ac-colors@1.4.2';
 
 const x = 1 * 2;
 console.log("Hello World from client.ts; " + x);
@@ -42,6 +45,14 @@ interface Actor extends Person {
   role: string;
 }
 
+const replaceLastTwoSpaces = function (text: string) {
+  const lastSpace = /\S+ \S+ \S+\s*$/g;
+  const lastWords = text.match(lastSpace)
+  text = text.replace(lastSpace, "");
+  console.log(text);
+  return html`${text}<nobr>${lastWords}</nobr>`;
+};
+
 @customElement("nitrile-book")
 class NitrileBook extends LitElement {
   @property() src = "/static/movies.json";
@@ -70,31 +81,37 @@ class NitrileBook extends LitElement {
   }
 
   render() {
-    return html`
-      ${
-        // renderes the later supplied parameters while the previous are unavailable
-        until(
-          this.fetchMovies(this.src).then(this.renderMovies),
-          html`<p>Loading...</p>`
-        )
-      }`;
+    return html` ${
+      // renderes the later supplied parameters while the previous are unavailable
+      until(
+        this.fetchMovies(this.src).then(this.renderMovies),
+        html`<p>Loading...</p>`
+      )
+    }`;
   }
 }
 
 const typographyStyle = css`
-h1 {
-  font-family: 'Oswald', sans-serif;
-  font-weight: 600;
-  font-size: 48pt;
-}
+  h1 {
+    font-family: "Oswald", sans-serif;
+    font-weight: 600;
+    font-size: 45pt;
+    text-align: center;
+  }
 
-p {
-  font-family: 'EB Garamond', serif;
-  font-weight: 400;
-  font-size: 12pt;
-  line-height: 140%;
-}
-`
+  p,
+  h2,
+  span {
+    font-family: "EB Garamond", serif;
+    font-weight: 400;
+    font-size: 13pt;
+    line-height: 140%;
+  }
+
+  h2 {
+    font-size: 24pt;
+  }
+`;
 
 @customElement("nitrile-movie")
 class NitrileMovie extends LitElement {
@@ -104,14 +121,15 @@ class NitrileMovie extends LitElement {
     return css`
       :host {
         width: 14.8cm;
-        height: 21.0cm;
+        /* height: 20.93cm; */
+        height: 20.955cm;
         display: flex;
         flex-direction: row;
+        overflow: hidden;
       }
 
       nitrile-peek {
         flex: 1;
-        color: coral;
       }
 
       nitrile-main {
@@ -133,18 +151,174 @@ class NitrileMovie extends LitElement {
   }
 }
 
-@customElement("nitrile-peek")
-class NitrilePeek extends LitElement {
+@customElement("nitrile-rating")
+class NitrileRating extends LitElement {
   @property() movie: Movie | null = null;
 
   static get styles() {
     return [
-      typographyStyle
-    ]
+      typographyStyle,
+      css`
+        :host {
+          border: #111;
+          border-style: solid;
+          border-width: 1px;
+          padding: 2px;
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          align-items: center;
+        }
+
+        span {
+          padding: 2px 4.5px;
+        }
+
+        span:nth-of-type(odd) {
+          text-align: right;
+          font-size: 14pt;
+        }
+
+        span:nth-of-type(even) {
+          text-align: left;
+          font-size: 12pt;
+        }
+      `,
+    ];
   }
 
   renderMovie(movie: Movie) {
-    return html`<p>${movie.actors[0].name}</p>`;
+    return html`
+      <span>${movie.imdb}</span>
+      <span>IMDB</span>
+      <span>${movie.rt_audience}</span>
+      <span>RT Audience</span>
+      <span>${movie.rt_critics}</span>
+      <span>RT Critics</span>
+    `;
+  }
+
+  render() {
+    if (this.movie === null) return html`<h1>No movie specified!</h1>`;
+    else return this.renderMovie(this.movie);
+  }
+}
+
+@customElement("nitrile-person")
+class NitrilePerson extends LitElement {
+  @property() person: Person | Actor | null = null;
+
+  static get styles() {
+    return [
+      typographyStyle,
+      css`
+        :host {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        img {
+          border-radius: 50%;
+          height: 36px;
+          width: 36px;
+        }
+        :host > span {
+          font-size: 11pt;
+          padding-left: 9px;
+        }
+        span {
+          font-size: 10pt;
+        }
+      `,
+    ];
+  }
+
+  renderPerson(person: Person | Actor) {
+    const result = html`
+      <img src=${person.avatar_src} />
+      ${"role" in person && person.role !== ""
+        ? html`<span>${person.name}</br><span>as ${person.role}</span></span>`
+        : html`<span>${person.name}</span>`}
+    `;
+
+    return result;
+  }
+
+  render() {
+    if (this.person === null) return html`<h1>No person specified!</h1>`;
+    else return this.renderPerson(this.person);
+  }
+}
+
+const createColor = function(color: typeof Color) {
+  const reference = new Color({"color":"#D1F0CF", "type":"hex"}).lchab
+  const target = color.lchab
+  
+  const result = new Color({
+    "color": [reference[0], reference[1], target[2]], 
+    "type": "lchab"
+  })
+
+  console.log(result)
+  return result
+}
+
+@customElement("nitrile-peek")
+class NitrilePeek extends LitElement {
+  @property() movie: Movie | null = null;
+  @property() color = createColor(Color.random());
+
+  static get styles() {
+    return [
+      typographyStyle,
+      css`
+        :host {
+          padding: 18px;
+        }
+        nitrile-rating {
+          margin: 9px 0;
+        }
+        nitrile-person {
+          margin: 9px 0;
+        }
+        img {
+          width: calc(100% + 2*18px - 2px);
+          margin: 0px -18px;
+          border: #eee solid 1px;
+        }
+        h2 {
+          margin: 0;
+          margin-top: -9px;
+        }
+        .genres {
+          text-align: center;
+          height: 38px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 0;
+        }
+        span {
+          font-size: 9.5pt;
+        }
+      `,
+    ];
+  }
+
+  renderMovie(movie: Movie) {
+    return html`
+      <style>:host { background-color: ${this.color.rgbString}}</style>
+      <h2>${movie.year}</h2>
+      <p class="genres"><span>${replaceLastTwoSpaces(movie.tags.join(" | "))}</span></p>
+      <nitrile-rating .movie=${movie}></nitrile-rating>
+      ${movie.directors.map(
+        (director) =>
+          html`<nitrile-person .person=${director}></nitrile-person>`
+      )}
+      <img src=${movie.poster_src} />
+      ${movie.actors.map(
+        (actor) => html`<nitrile-person .person=${actor}></nitrile-person>`
+      )}
+    `;
   }
 
   render() {
@@ -157,14 +331,58 @@ class NitrilePeek extends LitElement {
 class NitrileMain extends LitElement {
   @property() movie: Movie | null = null;
 
+
+
   static get styles() {
     return [
-      typographyStyle
-    ]
+      typographyStyle,
+      css`
+      :host {
+        display: flex;
+        flex-direction: column;
+        margin: 36px;
+      }
+      h1 {
+        flex: 0;
+        height: 350px;
+        margin: 0:
+      }
+      h1.long {
+        font-size: 36pt;
+      }
+      h1.verylong {
+        font-size: 27pt;
+      }
+      h1.superlong {
+        font-size: 22pt;
+      }
+      
+
+      p {
+        flex: 1;
+      }
+      .personal-rating {
+        flex: 0;
+        flex-basis: 140px;
+        border: #F0F0F0;
+        border-width: 15px;
+        border-style: solid;
+      }
+      `,
+    ];
   }
 
   renderMovie(movie: Movie) {
-    return html`<h1>${movie.title}</h1>`;
+    const cls = 
+    movie.title.length >= 40 ? "superlong" :
+    movie.title.length >= 24 ? "verylong" :
+    movie.title.length >= 17 ? "long" : "";
+
+    return html`
+      <h1 class=${cls}>${movie.title}</h1>
+      <p>${replaceLastTwoSpaces(movie.synopsis)}</p>
+      <div class="personal-rating">TODO: Rating here</div>
+    `;
   }
 
   render() {
