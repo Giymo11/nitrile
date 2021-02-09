@@ -45,8 +45,8 @@ interface Actor extends Person {
   role: string;
 }
 
-const replaceLastTwoSpaces = function (text: string) {
-  const lastSpace = /\S+ \S+ \S+\s*$/g;
+const replaceLastTwoSpaces = function (text: string, spaces: number) {
+  const lastSpace = spaces == 2 ? /\S+ \S+ \S+\s*$/g : /\S+ \S+\s*$/g
   const lastWords = text.match(lastSpace);
   text = text.replace(lastSpace, "");
   console.log(text);
@@ -327,7 +327,7 @@ class NitrilePeek extends LitElement {
       </style>
       <h2>${movie.year}</h2>
       <p class="genres">
-        <span>${replaceLastTwoSpaces(movie.tags.join(" | "))}</span>
+        <span>${replaceLastTwoSpaces(movie.tags.join(" | "), 2)}</span>
       </p>
       <nitrile-rating .movie=${movie}></nitrile-rating>
       ${movie.directors.map(
@@ -392,10 +392,10 @@ class NitrileMain extends LitElement {
           font-size: 12pt;
         }
         p.verylong {
-          font-size: 10pt;
+          font-size: 11pt;
         }
         p.superlong {
-          font-size: 9pt;
+          font-size: 10pt;
         }
 
         .personal-rating {
@@ -404,6 +404,11 @@ class NitrileMain extends LitElement {
           border: #f0f0f0;
           border-width: 15px;
           border-style: solid;
+          text-align: center;
+        }
+
+        .personal-rating > span {
+          line-height: 165%;
         }
       `,
     ];
@@ -422,9 +427,9 @@ class NitrileMain extends LitElement {
     const factor = 30
 
     const synopsisClass =
-      movie.synopsis.length >= factor*40
+      movie.synopsis.length >= factor*30
         ? "superlong"
-        : movie.synopsis.length >= factor*24
+        : movie.synopsis.length >= factor*23
         ? "verylong"
         : movie.synopsis.length >= factor*17
         ? "long"
@@ -434,8 +439,10 @@ class NitrileMain extends LitElement {
       <div class="title-container">
         <h1 class=${titleClass}>${movie.title}</h1>
       </div>
-      <p class=${synopsisClass}>${replaceLastTwoSpaces(movie.synopsis)}</p>
-      <div class="personal-rating">TODO: Rating here</div>
+      <p class=${synopsisClass}>${replaceLastTwoSpaces(movie.synopsis, 1)}</p>
+      <div class="personal-rating">
+      <span>Notes</span>
+      </div>
     `;
   }
 
