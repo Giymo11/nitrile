@@ -46,7 +46,7 @@ interface Actor extends Person {
 }
 
 const replaceLastTwoSpaces = function (text: string, spaces: number) {
-  const lastSpace = spaces == 2 ? /\S+ \S+ \S+\s*$/g : /\S+ \S+\s*$/g
+  const lastSpace = spaces == 2 ? /\S+ \S+ \S+\s*$/g : /\S+ \S+\s*$/g;
   const lastWords = text.match(lastSpace);
   text = text.replace(lastSpace, "");
   console.log(text);
@@ -73,7 +73,7 @@ class NitrileBook extends LitElement {
     return movies.map(
       (movie, index) => html` <nitrile-movie
         .movie=${movie}
-        class=${index % 2 == 0 ? "" : "reverse"}
+        class=${index % 2 == 1 ? "" : "reverse"}
       ></nitrile-movie>`
     );
   }
@@ -284,21 +284,25 @@ class NitrilePeek extends LitElement {
       css`
         :host {
           padding: 24px 18px 24px 24px;
-          
         }
+        :host-context(.reverse) {
+          padding: 24px 24px 24px 18px;
+        }
+
         nitrile-rating {
           margin: 9px 0;
         }
         nitrile-person {
           margin: 9px 0;
         }
+
         img {
-          width: calc(100% + 2*18px - 2px);
+          width: calc(100% + 2 * 18px - 2px);
           margin: 0px 0 0px 0px;
-          border: #000 solid 5px;
+          border: #000 solid 4px;
         }
         :host-context(.reverse) > img {
-          margin: 0px 0 0px -36px;
+          margin: 0px 0 0px -41px;
         }
 
         h2 {
@@ -308,9 +312,7 @@ class NitrilePeek extends LitElement {
         :host-context(.reverse) > h2 {
           text-align: right;
         }
-        :host-context(.reverse) {
-          padding: 24px 24px 24px 18px;
-        }
+
         .genres {
           text-align: center;
           height: 38px;
@@ -378,6 +380,7 @@ class NitrileMain extends LitElement {
           justify-content: center;
           align-items: center;
         }
+
         h1 {
           flex: 0;
           margin: 0;
@@ -415,7 +418,6 @@ class NitrileMain extends LitElement {
           border-style: solid;
           text-align: center;
         }
-
         .personal-rating > span {
           line-height: 165%;
         }
@@ -433,14 +435,14 @@ class NitrileMain extends LitElement {
         ? "long"
         : "";
 
-    const factor = 30
+    const factor = 30;
 
     const synopsisClass =
-      movie.synopsis.length >= factor*30
+      movie.synopsis.length >= factor * 28.5
         ? "superlong"
-        : movie.synopsis.length >= factor*23
+        : movie.synopsis.length >= factor * 22
         ? "verylong"
-        : movie.synopsis.length >= factor*17
+        : movie.synopsis.length >= factor * 17
         ? "long"
         : "";
 
@@ -449,8 +451,11 @@ class NitrileMain extends LitElement {
         <h1 class=${titleClass}>${movie.title}</h1>
       </div>
       <p class=${synopsisClass}>${replaceLastTwoSpaces(movie.synopsis, 1)}</p>
-      <div class="personal-rating" style="border-color: ${this.color.rgbString}">
-      <span>Notes</span>
+      <div
+        class="personal-rating"
+        style="border-color: ${this.color.rgbString}"
+      >
+        <span>Notes</span>
       </div>
     `;
   }
