@@ -73,7 +73,7 @@ class NitrileBook extends LitElement {
     return movies.map(
       (movie, index) => html` <nitrile-movie
         .movie=${movie}
-        class=${index % 2 == 1 ? "" : "reverse"}
+        class=${index % 2 == 0 ? "" : "reverse"}
       ></nitrile-movie>`
     );
   }
