@@ -82,7 +82,7 @@ class NitrileBook extends LitElement {
     return css`
       :host {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
     `;
   }
@@ -123,13 +123,14 @@ const typographyStyle = css`
 @customElement("nitrile-movie")
 class NitrileMovie extends LitElement {
   @property() movie: Movie | null = null;
+  @property() color = createColor(Color.random());
 
   static get styles() {
     return css`
       :host {
-        width: 14.8cm;
+        width: 14.81cm;
         /* height: 20.93cm; */
-        height: 20.955cm;
+        height: 20.9815cm;
         display: flex;
         overflow: hidden;
         flex-direction: row;
@@ -149,8 +150,8 @@ class NitrileMovie extends LitElement {
 
   renderMovie(movie: Movie) {
     return html`
-      <nitrile-peek .movie=${movie}></nitrile-peek>
-      <nitrile-main .movie=${movie}></nitrile-main>
+      <nitrile-peek .movie=${movie} .color=${this.color}></nitrile-peek>
+      <nitrile-main .movie=${movie} .color=${this.color}></nitrile-main>
     `;
   }
 
@@ -282,7 +283,8 @@ class NitrilePeek extends LitElement {
       typographyStyle,
       css`
         :host {
-          padding: 18px;
+          padding: 24px 18px 24px 24px;
+          
         }
         nitrile-rating {
           margin: 9px 0;
@@ -291,9 +293,12 @@ class NitrilePeek extends LitElement {
           margin: 9px 0;
         }
         img {
-          width: calc(100% + 2 * 18px - 2px);
-          margin: 0px -18px;
-          border: #eee solid 1px;
+          width: calc(100% + 2*18px - 2px);
+          margin: 0px 0 0px 0px;
+          border: #000 solid 5px;
+        }
+        :host-context(.reverse) > img {
+          margin: 0px 0 0px -36px;
         }
 
         h2 {
@@ -302,6 +307,9 @@ class NitrilePeek extends LitElement {
         }
         :host-context(.reverse) > h2 {
           text-align: right;
+        }
+        :host-context(.reverse) {
+          padding: 24px 24px 24px 18px;
         }
         .genres {
           text-align: center;
@@ -350,6 +358,7 @@ class NitrilePeek extends LitElement {
 @customElement("nitrile-main")
 class NitrileMain extends LitElement {
   @property() movie: Movie | null = null;
+  @property() color = createColor(Color.random());
 
   static get styles() {
     return [
@@ -358,7 +367,7 @@ class NitrileMain extends LitElement {
         :host {
           display: flex;
           flex-direction: column;
-          margin: 36px;
+          margin: 42px;
         }
         .title-container {
           display: flex;
@@ -401,7 +410,7 @@ class NitrileMain extends LitElement {
         .personal-rating {
           flex: 0;
           flex-basis: 140px;
-          border: #f0f0f0;
+          border: #d9d9d9;
           border-width: 15px;
           border-style: solid;
           text-align: center;
@@ -440,7 +449,7 @@ class NitrileMain extends LitElement {
         <h1 class=${titleClass}>${movie.title}</h1>
       </div>
       <p class=${synopsisClass}>${replaceLastTwoSpaces(movie.synopsis, 1)}</p>
-      <div class="personal-rating">
+      <div class="personal-rating" style="border-color: ${this.color.rgbString}">
       <span>Notes</span>
       </div>
     `;
